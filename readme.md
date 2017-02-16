@@ -42,4 +42,55 @@ class Channel extends Model
         return $this->belongsTo(User::class);
     }
 }
+
+// RegisterController
+class RegisterController extends Controller
+{
+    use RegistersUsers;
+
+    protected $redirectTo = '/home';
+
+    public function __construct()
+    {
+        $this->middleware('guest');
+    }
+
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            'name' => 'required|max:255',
+            'channel_name'=>'required|max:255|unique:channels,name',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|min:6|confirmed',
+        ]);
+    }
+
+    protected function create(array $data)
+    {
+        $user =  User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+        ]);
+
+        $user->channel()->create([
+            'name'=>$data['channel_name'],
+            'slug'=>uniqid(true),
+        ]);
+        return $user;
+    }
+}
 ```
+
+### 2.queues
+art queue:table
+art queue:failed-table
+art migrate 
+
+```
+// .env
+QUEUE_DRIVER=database 
+
+```
+
+### 3.Navigation 
