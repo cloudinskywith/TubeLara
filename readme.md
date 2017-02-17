@@ -158,3 +158,70 @@ Route::group(['middleware'=>['auth']],function(){
 在view中消费
 ```
 
+- art make:request ChannelUpdateRequest 
+```
+class ChannelUpdateRequest extends FormRequest
+{
+    public function authorize()
+    {
+        return true;
+    }
+
+    public function rules()
+    {
+        $channelId = Auth::user()->channel()->first()->id;
+        return [
+            'name'=>'required|max:255|unique:channels,name,'.$channelId,
+            'slug'=>'required|max:255|alpha_num|unique:channels,slug,'.$channelId,
+            'description'=>'max:1000',
+        ];
+    }
+}
+```
+
+- art make:policy ChannelPolicy 
+```
+// ChannelPolicy 
+class ChannelPolicy
+{
+    use HandlesAuthorization;
+
+   public function update(User $user,Channel $channel){
+       return ($user->id) === ($channel->user_id);;
+   }
+
+   public function edit(User $user,Channel $channel){
+       return ($user->id) === ($channel->user_id);;
+   }
+}
+
+// AuthServiceProvider.php
+class AuthServiceProvider extends ServiceProvider
+{
+    protected $policies = [
+        'App\Http\Models\Channel'=>'App\Policies\ChannelPolicy',
+    ];
+    
+    public function boot()
+    {
+        $this->registerPolicies();
+    }
+}
+
+// ChannelSettingsController.php
+    public function edit(Channel $channel)
+    {
+        $this->authorize('edit',$channel);
+        return view('channel.edit',compact('channel'));
+    }
+    public function update(ChannelUpdateRequest $request,Channel $channel)
+    {
+            $this->authorize('update',$channel);
+            $channel->update([
+                'name'=>$request->name,
+                'slug'=>$request->slug,
+                'description'=>$request->description,
+            ]);
+            return redirect()->to("/channel/{$channel->slug}/edit");
+    }
+```
