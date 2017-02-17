@@ -94,3 +94,36 @@ QUEUE_DRIVER=database
 ```
 
 ### 3.Navigation 
+- 1.将navigation提取出来，放到layouts.partials._navigation中
+- 2.新建serviceprovider实现变量全局可用 art make:provider ComposerServiceProvider 
+```
+// App/Provider/ComposerServiceProvider 
+class ComposerServiceProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        view()->composer('layouts.partials._navigation',NavigationComposer::class);
+    }
+    public function register()
+    {
+    }
+}
+
+// 在app.php中注册
+        App\Providers\ComposerServiceProvider::class,
+```
+- 3.新建ViewComposer
+```
+// app/Http/ViewComposer/NavigationComposer.php
+class NavigationComposer{
+    public function compose(View $view){
+        if(!Auth::check()){
+            return;
+        }
+        $view->with('channel',Auth::user()->channel->first());
+    }
+}
+```
+- 4.在_navigation中消费该变量即可。
+
+
