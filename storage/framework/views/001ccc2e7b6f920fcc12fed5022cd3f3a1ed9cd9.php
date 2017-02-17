@@ -6,7 +6,7 @@
                     <div class="panel-heading">Channel Setting</div>
 
                     <div class="panel-body">
-                        <form action="/channel/<?php echo e($channel->slug); ?>/edit" method="post">
+                        <form action="/channel/<?php echo e($channel->slug); ?>/edit" method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="name">Name</label>
                                 <input type="text" class="form-control" id="name" name="name"
@@ -46,6 +46,11 @@
 
                                     </div>
                                 <?php endif; ?>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="image">Channel Image</label>
+                                <input type="file" name="image" id="image">
                             </div>
 
                             <button class="btn btn-default" type="submit">提交</button>

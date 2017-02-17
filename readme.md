@@ -225,3 +225,10 @@ class AuthServiceProvider extends ServiceProvider
             return redirect()->to("/channel/{$channel->slug}/edit");
     }
 ```
+
+#### 5.s3
+忽略
+
+#### 6.Image和Video
+
+art make:job UploadImage 
