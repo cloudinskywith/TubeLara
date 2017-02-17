@@ -126,4 +126,35 @@ class NavigationComposer{
 ```
 - 4.在_navigation中消费该变量即可。
 
+### 4.channel settings 
+art make:controller ChannelSettingsController --resource 
+
+```
+在view中消费了$channel这个变量，从route中获取到参数，再通过controller传递给view
+
+// web.php
+Route::group(['middleware'=>['auth']],function(){
+   Route::get('/channel/{channel}/edit','ChannelSettingsController@edit');
+   Route::put('/channel/{channel}/edit','ChannelSettingsController@update');
+});
+
+// Channel.php
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+// ChannelSettingsController
+    public function edit(Channel $channel)
+    {
+        return view('channel.edit',compact('channel'));
+    }
+```
+
+- 修改.env参数配置
+```
+// .env 
+在其中将APP_URL参数修改为http://localhost:8000/
+在view中消费
+```
 

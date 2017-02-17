@@ -37,7 +37,7 @@
                         <ul class="dropdown-menu" role="menu">
                             <li>
                                 <a href="{{url('/channel/'.$channel->slug)}}">You Channel</a>
-                                <a href="">Channel Settings</a>
+                                <a href="{{url('/channel/'.$channel->slug.'/edit')}}">Channel Settings</a>
 
                                 <a href="{{ route('logout') }}"
                                    onclick="event.preventDefault();

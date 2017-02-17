@@ -38,7 +38,7 @@
                         <ul class="dropdown-menu" role="menu">
                             <li>
                                 <a href="<?php echo e(url('/channel/'.$channel->slug)); ?>">You Channel</a>
-                                <a href="">Channel Settings</a>
+                                <a href="<?php echo e(url('/channel/'.$channel->slug.'/edit')); ?>">Channel Settings</a>
 
                                 <a href="<?php echo e(route('logout')); ?>"
                                    onclick="event.preventDefault();
