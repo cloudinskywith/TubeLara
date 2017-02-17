@@ -1,17 +1,5 @@
 <?php
 
-define('LARAVEL_START', microtime(true));
+define('LARAVEL_START', microtime(true));  //定义一个常数，记录框架开始执行的时间，用于衡量框架的性能
 
-/*
-|--------------------------------------------------------------------------
-| Register The Composer Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader
-| for our application. We just need to utilize it! We'll require it
-| into the script here so that we do not have to worry about the
-| loading of any our classes "manually". Feels great to relax.
-|
-*/
-
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php'; //composer工具管理
