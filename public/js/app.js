@@ -12165,17 +12165,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = {
     data: function data() {
         return {
-            uid: '',
+            uid: null,
             uploading: false,
             uploadingComplete: false,
             failed: false,
             title: 'Untitled',
             description: null,
-            visibility: 'private'
+            visibility: 'private',
+            saveStatus: 'Not Save.'
         };
     },
 
@@ -12199,6 +12219,24 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }).then(function (response) {
                 console.log(response.data.data.uid);
                 _this.uid = response.data.data.uid;
+            });
+        },
+        update: function update() {
+            var _this2 = this;
+
+            this.saveStatus = 'Saving changes';
+            return this.$http.put('/videos/' + this.uid, {
+                title: this.title,
+                description: this.description,
+                visibility: this.visibility
+            }).then(function (response) {
+                console.log(response.data.data);
+                _this2.saveStatus = 'Changes saved';
+                setTimeout(function () {
+                    _this2.saveStatus = '';
+                }, 2000);
+            }, function () {
+                _this2.saveStatus = 'Failed save';
             });
         }
     },
@@ -31834,7 +31872,108 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "id": "video-form"
     }
-  }, [_vm._v("\n                        Form\n                    ")]) : _vm._e()])])])])])
+  }, [_c('div', {
+    staticClass: "form-group"
+  }, [_c('label', {
+    attrs: {
+      "for": "title"
+    }
+  }, [_vm._v("Title")]), _vm._v(" "), _c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.title),
+      expression: "title"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      "type": "text"
+    },
+    domProps: {
+      "value": _vm._s(_vm.title)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.title = $event.target.value
+      }
+    }
+  })]), _vm._v(" "), _c('div', {
+    staticClass: "form-group"
+  }, [_c('label', {
+    attrs: {
+      "for": "description"
+    }
+  }, [_vm._v("Description")]), _vm._v(" "), _c('textarea', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.description),
+      expression: "description"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      "type": "text"
+    },
+    domProps: {
+      "value": _vm._s(_vm.description)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.description = $event.target.value
+      }
+    }
+  })]), _vm._v(" "), _c('div', {
+    staticClass: "form-group"
+  }, [_c('label', {
+    attrs: {
+      "for": "visibility"
+    }
+  }, [_vm._v("Visibility")]), _vm._v(" "), _c('select', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.visibility),
+      expression: "visibility"
+    }],
+    staticClass: "form-control",
+    on: {
+      "change": function($event) {
+        _vm.visibility = Array.prototype.filter.call($event.target.options, function(o) {
+          return o.selected
+        }).map(function(o) {
+          var val = "_value" in o ? o._value : o.value;
+          return val
+        })[0]
+      }
+    }
+  }, [_c('option', {
+    attrs: {
+      "value": "private"
+    }
+  }, [_vm._v("Private")]), _vm._v(" "), _c('option', {
+    attrs: {
+      "value": "unlisted"
+    }
+  }, [_vm._v("Unlisted")]), _vm._v(" "), _c('option', {
+    attrs: {
+      "value": "public"
+    }
+  }, [_vm._v("Public")])])]), _vm._v(" "), _c('span', {
+    staticClass: "help-block pull-right"
+  }, [_vm._v(_vm._s(_vm.saveStatus))]), _vm._v(" "), _c('button', {
+    staticClass: "btn-default btn",
+    attrs: {
+      "type": "submit"
+    },
+    on: {
+      "click": function($event) {
+        $event.preventDefault();
+        _vm.update($event)
+      }
+    }
+  }, [_vm._v("Save")])]) : _vm._e()])])])])])
 },staticRenderFns: []}
 module.exports.render._withStripped = true
 if (false) {

@@ -496,6 +496,81 @@ class VideoController extends Controller
     }
 }
 ```
+#### 16.Saving Video Details 
+```
+// VideoUpload.vue 
+                        <div id="video-form" v-if="uploading &&!failed">
+                            <div class="form-group">
+                                <label for="title">Title</label>
+                                <input type="text" class="form-control" v-model="title">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea type="text" class="form-control" v-model="description"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="visibility">Visibility</label>
+                                <select class="form-control" v-model="visibility">
+                                    <option value="private">Private</option>
+                                    <option value="unlisted">Unlisted</option>
+                                    <option value="public">Public</option>
+                                </select>
+                            </div>
+                            <span class="help-block pull-right">Save Status</span>
+                            <button class="btn-default btn" type="submit" @click.prevent="update">Save</button>
+                        </div>
+```
+
+art make:policy VideoPolicy 
+art make:request VideoUploadRequest 
+```
+class VideoPolicy
+{
+    use HandlesAuthorization;
+
+    public function update(User $user,Video $video){
+        return $user->id === $video->channel->user_id;
+    }
+}
+
+class VideoUpdateRequest extends FormRequest
+{
+    public function authorize()
+    {
+        return true;
+    }
+    public function rules()
+    {
+        return [
+            'title'=>'required|max:255',
+            'description'=>'max:2000',
+            'visibility'=>'required',
+        ];
+    }
+}
+
+// VideoController.php
+    public function update(VideoUpdateRequest $request,Video $video){
+        $this->authorize('update',$video);
+
+        $video->update([
+            'title'=>$request->title,
+            'description'=>$request->description,
+            'visibility'=>$request->visibility,
+            'allow_votes'=>$request->has('allow_votes'),
+            'allow_comments'=>$request->has('allow_comments'),
+        ]);
+        if($request->ajax()){
+            return response()->json(null,200);
+        }
+        return redirect()->back();
+    }
+```
+
+
+
 
 
 
