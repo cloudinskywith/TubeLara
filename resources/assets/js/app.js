@@ -7,6 +7,7 @@
 
 require('./bootstrap');
 
+var VueResource = require('vue-resource');
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -15,6 +16,14 @@ require('./bootstrap');
 
 Vue.component('example', require('./components/Example.vue'));
 Vue.component('video-upload', require('./components/VideoUpload.vue'));
+// Vue.http.interceptors.push(function (request, next) {
+//     request.headers['X-CSRF-TOKEN'] = Laravel.csrfToken;
+//     next();
+// });
+Vue.use(VueResource);
+Vue.http.headers.common['X-CSRF-TOKEN'] = $('meta[name="csrf-token"]').attr('content');
+
+
 
 const app = new Vue({
     el: '#app'

@@ -22,9 +22,10 @@ Route::get('/home', 'HomeController@index');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index');
-Route::get('/upload','VideoUploadController@index');
 
-Route::group(['middleware'=>['auth']],function(){
-   Route::get('/channel/{channel}/edit','ChannelSettingsController@edit');
-   Route::put('/channel/{channel}/edit','ChannelSettingsController@update');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/upload', 'VideoUploadController@index');
+    Route::post('/video','VideoController@store');
+    Route::get('/channel/{channel}/edit', 'ChannelSettingsController@edit');
+    Route::put('/channel/{channel}/edit', 'ChannelSettingsController@update');
 });
