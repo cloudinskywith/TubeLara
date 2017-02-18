@@ -569,7 +569,89 @@ class VideoUpdateRequest extends FormRequest
     }
 ```
 
+#### 17.Video Upload 
+修改php.ini中关于post的最大值
+find / -name php.ini
+sudo vim /etc/php5/cli/php.ini 
+post_max_size = 100M 
+upload_max_size = 100M 
 
+```
+// VideoUpload.vue 
+
+        methods: {
+            fileInputChange(){
+                this.uploading = true;
+                this.failed = false;
+                this.file = document.getElementById('video').files[0];
+
+                this.store().then(() => {
+                    var form = new FormData();
+                    form.append('video', this.file);
+                    form.append('uid', this.uid);
+                    this.$http.post('/upload', form, {
+                        progress: (e) => {
+                            if (e.lengthComputable) {
+                                console.log(e.loaded + ' ' + e.total);
+                                this.updateProgress(e);
+                            }
+                        }
+                    }).then(() => {
+                        this.uploadingComplete = true;
+                    }, () => {
+                        this.failed = true;
+                    })
+                }, () => {
+                    this.failed = true;
+                });
+                console.log("File Change");
+            },
+            store(){
+                return this.$http
+                    .post('/video', {
+                        title: this.title,
+                        description: this.description,
+                        visibility: this.visibility,
+                        extension: this.file.name.split('.').pop()
+                    })
+                    .then((response) => {
+                        console.log(response.data.data.uid);
+                        this.uid = response.data.data.uid;
+                    });
+            },
+            update(){
+                this.saveStatus = 'Saving changes';
+                return this.$http
+                    .put('/videos/' + this.uid, {
+                        title: this.title,
+                        description: this.description,
+                        visibility: this.visibility
+                    })
+                    .then((response) => {
+                        console.log(response.data.data);
+                        this.saveStatus = 'Changes saved';
+                        setTimeout(() => {
+                            this.saveStatus = '';
+                        }, 2000);
+                    }, () => {
+                        this.saveStatus = 'Failed save';
+                    });
+            },
+            updateProgress(e){
+                e.percent = (e.loaded / e.total) + 100;
+                this.fileProgress = e.percent;
+            }
+        },
+
+// VideoUploadController.php
+    public function store(Request $request){
+        $channel = $request->user()->channel()->first();
+        $video = $channel->videos()->where('uid',$request->uid)->firstOrFail();
+        $request->file('video')->move(storage_path() . '/uploads',$video->video_filename);
+    }
+```
+
+#### 18.
 
 
 

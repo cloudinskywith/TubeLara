@@ -18,15 +18,23 @@
         window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),
         ]) !!};
+
+        window.codeTube = {
+            url: '{{ config('app.url') }}',
+            user: {
+                id:{{Auth::check()?Auth::user()->id:nul}},
+                authenticated:{{Auth::check()?'true':'false'}}
+            }
+        };
     </script>
 </head>
 <body>
-    <div id="app">
-        @include('layouts.partials._navigation')
-        @yield('content')
-    </div>
+<div id="app">
+    @include('layouts.partials._navigation')
+    @yield('content')
+</div>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
+<!-- Scripts -->
+<script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

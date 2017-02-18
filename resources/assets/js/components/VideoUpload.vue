@@ -6,7 +6,18 @@
                     <div class="panel-heading">Upload</div>
                     <div class="panel-body">
                         <input type="file" name="video" id="video" @change="fileInputChange" v-if="!uploading">
+                        <div class="alert alert-danger" v-if="failed">Something Went Wrong,Please Try Again</div>
+
                         <div id="video-form" v-if="uploading &&!failed">
+                            <div class="alert alert-info" v-if="!uploadingComplete">Your Will Be available at {{$root.url }}/videos/{{uid}}</div>
+                            <div class="alert alert-info" v-if="uploadingComplete">Upload complete.Video is now
+                                <a href="{$root.url}videos/{uid}" target="_blank">{{$root.url }}videos/{{uid}}</a>
+                            </div>
+
+                            <div class="progress" v-if="!uploadingComplete">
+                                <div class="progress-bar" v-bind:style="{width: fileProgress + '%'}"></div>
+                            </div>
+
                             <div class="form-group">
                                 <label for="title">Title</label>
                                 <input type="text" class="form-control" v-model="title">
@@ -46,7 +57,8 @@
                 title: 'Untitled',
                 description: null,
                 visibility: 'private',
-                saveStatus:'Not Save.',
+                saveStatus: 'Not Save.',
+                fileProgress: 0,
             }
         },
         methods: {
@@ -56,7 +68,23 @@
                 this.file = document.getElementById('video').files[0];
 
                 this.store().then(() => {
-
+                    var form = new FormData();
+                    form.append('video', this.file);
+                    form.append('uid', this.uid);
+                    this.$http.post('/upload', form, {
+                        progress: (e) => {
+                            if (e.lengthComputable) {
+                                console.log(e.loaded + ' ' + e.total);
+                                this.updateProgress(e);
+                            }
+                        }
+                    }).then(() => {
+                        this.uploadingComplete = true;
+                    }, () => {
+                        this.failed = true;
+                    })
+                }, () => {
+                    this.failed = true;
                 });
                 console.log("File Change");
             },
@@ -74,22 +102,26 @@
                     });
             },
             update(){
-                this.saveStatus =  'Saving changes';
+                this.saveStatus = 'Saving changes';
                 return this.$http
                     .put('/videos/' + this.uid, {
                         title: this.title,
                         description: this.description,
                         visibility: this.visibility
                     })
-                    .then((response)=>{
+                    .then((response) => {
                         console.log(response.data.data);
                         this.saveStatus = 'Changes saved';
-                        setTimeout(()=>{
+                        setTimeout(() => {
                             this.saveStatus = '';
-                        },2000);
-                    },()=>{
+                        }, 2000);
+                    }, () => {
                         this.saveStatus = 'Failed save';
                     });
+            },
+            updateProgress(e){
+                e.percent = (e.loaded / e.total) + 100;
+                this.fileProgress = e.percent;
             }
         },
         mounted() {

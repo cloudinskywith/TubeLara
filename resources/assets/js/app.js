@@ -16,13 +16,10 @@ var VueResource = require('vue-resource');
 
 Vue.component('example', require('./components/Example.vue'));
 Vue.component('video-upload', require('./components/VideoUpload.vue'));
-// Vue.http.interceptors.push(function (request, next) {
-//     request.headers['X-CSRF-TOKEN'] = Laravel.csrfToken;
-//     next();
-// });
 Vue.use(VueResource);
 Vue.http.headers.common['X-CSRF-TOKEN'] = $('meta[name="csrf-token"]').attr('content');
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+    data: window.codeTube
 });

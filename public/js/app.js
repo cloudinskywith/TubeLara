@@ -11253,15 +11253,12 @@ var VueResource = __webpack_require__(40);
 
 Vue.component('example', __webpack_require__(36));
 Vue.component('video-upload', __webpack_require__(37));
-// Vue.http.interceptors.push(function (request, next) {
-//     request.headers['X-CSRF-TOKEN'] = Laravel.csrfToken;
-//     next();
-// });
 Vue.use(VueResource);
 Vue.http.headers.common['X-CSRF-TOKEN'] = $('meta[name="csrf-token"]').attr('content');
 
 var app = new Vue({
-  el: '#app'
+  el: '#app',
+  data: window.codeTube
 });
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
@@ -12184,6 +12181,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = {
     data: function data() {
@@ -12195,21 +12203,42 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             title: 'Untitled',
             description: null,
             visibility: 'private',
-            saveStatus: 'Not Save.'
+            saveStatus: 'Not Save.',
+            fileProgress: 0
         };
     },
 
     methods: {
         fileInputChange: function fileInputChange() {
+            var _this = this;
+
             this.uploading = true;
             this.failed = false;
             this.file = document.getElementById('video').files[0];
 
-            this.store().then(function () {});
+            this.store().then(function () {
+                var form = new FormData();
+                form.append('video', _this.file);
+                form.append('uid', _this.uid);
+                _this.$http.post('/upload', form, {
+                    progress: function progress(e) {
+                        if (e.lengthComputable) {
+                            console.log(e.loaded + ' ' + e.total);
+                            _this.updateProgress(e);
+                        }
+                    }
+                }).then(function () {
+                    _this.uploadingComplete = true;
+                }, function () {
+                    _this.failed = true;
+                });
+            }, function () {
+                _this.failed = true;
+            });
             console.log("File Change");
         },
         store: function store() {
-            var _this = this;
+            var _this2 = this;
 
             return this.$http.post('/video', {
                 title: this.title,
@@ -12218,11 +12247,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 extension: this.file.name.split('.').pop()
             }).then(function (response) {
                 console.log(response.data.data.uid);
-                _this.uid = response.data.data.uid;
+                _this2.uid = response.data.data.uid;
             });
         },
         update: function update() {
-            var _this2 = this;
+            var _this3 = this;
 
             this.saveStatus = 'Saving changes';
             return this.$http.put('/videos/' + this.uid, {
@@ -12231,13 +12260,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 visibility: this.visibility
             }).then(function (response) {
                 console.log(response.data.data);
-                _this2.saveStatus = 'Changes saved';
+                _this3.saveStatus = 'Changes saved';
                 setTimeout(function () {
-                    _this2.saveStatus = '';
+                    _this3.saveStatus = '';
                 }, 2000);
             }, function () {
-                _this2.saveStatus = 'Failed save';
+                _this3.saveStatus = 'Failed save';
             });
+        },
+        updateProgress: function updateProgress(e) {
+            e.percent = e.loaded / e.total + 100;
+            this.fileProgress = e.percent;
         }
     },
     mounted: function mounted() {
@@ -31868,11 +31901,29 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     on: {
       "change": _vm.fileInputChange
     }
-  }) : _vm._e(), _vm._v(" "), (_vm.uploading && !_vm.failed) ? _c('div', {
+  }) : _vm._e(), _vm._v(" "), (_vm.failed) ? _c('div', {
+    staticClass: "alert alert-danger"
+  }, [_vm._v("Something Went Wrong,Please Try Again")]) : _vm._e(), _vm._v(" "), (_vm.uploading && !_vm.failed) ? _c('div', {
     attrs: {
       "id": "video-form"
     }
+  }, [(!_vm.uploadingComplete) ? _c('div', {
+    staticClass: "alert alert-info"
+  }, [_vm._v("Your Will Be available at " + _vm._s(_vm.$root.url) + "/videos/" + _vm._s(_vm.uid))]) : _vm._e(), _vm._v(" "), (_vm.uploadingComplete) ? _c('div', {
+    staticClass: "alert alert-info"
+  }, [_vm._v("Upload complete.Video is now\n                            "), _c('a', {
+    attrs: {
+      "href": "{$root.url}videos/{uid}",
+      "target": "_blank"
+    }
+  }, [_vm._v(_vm._s(_vm.$root.url) + "videos/" + _vm._s(_vm.uid))])]) : _vm._e(), _vm._v(" "), (!_vm.uploadingComplete) ? _c('div', {
+    staticClass: "progress"
   }, [_c('div', {
+    staticClass: "progress-bar",
+    style: ({
+      width: _vm.fileProgress + '%'
+    })
+  })]) : _vm._e(), _vm._v(" "), _c('div', {
     staticClass: "form-group"
   }, [_c('label', {
     attrs: {

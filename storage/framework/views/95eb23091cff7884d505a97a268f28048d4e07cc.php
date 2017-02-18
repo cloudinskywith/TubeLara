@@ -18,15 +18,24 @@
         window.Laravel = <?php echo json_encode([
             'csrfToken' => csrf_token(),
         ]); ?>;
+
+        window.codeTube = {
+            url: '<?php echo e(config('app.url')); ?>',
+            user: {
+                id:<?php echo e(Auth::check()?Auth::user()->id:nul); ?>,
+                authenticated:<?php echo e(Auth::check()?'true':'false'); ?>
+
+            }
+        };
     </script>
 </head>
 <body>
-    <div id="app">
-        <?php echo $__env->make('layouts.partials._navigation', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
-        <?php echo $__env->yieldContent('content'); ?>
-    </div>
+<div id="app">
+    <?php echo $__env->make('layouts.partials._navigation', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+    <?php echo $__env->yieldContent('content'); ?>
+</div>
 
-    <!-- Scripts -->
-    <script src="<?php echo e(asset('js/app.js')); ?>"></script>
+<!-- Scripts -->
+<script src="<?php echo e(asset('js/app.js')); ?>"></script>
 </body>
 </html>
