@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\Channel;
 use App\Http\Requests\ChannelUpdateRequest;
+use App\Jobs\UploadImage;
 use Illuminate\Http\Request;
 
 class ChannelSettingsController extends Controller
@@ -46,7 +47,7 @@ class ChannelSettingsController extends Controller
         if($request->file('image')){
             //move to temp location
             $request->file('image')->move(storage_path().'/uploads',$fileId = uniqid(true));
-
+            $this->dispatch(new UploadImage($channel,$fileId));
         }
         return redirect()->to("/channel/{$channel->slug}/edit");
     }

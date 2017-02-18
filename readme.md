@@ -93,7 +93,7 @@ QUEUE_DRIVER=database
 
 ```
 
-### 3.Navigation 
+### 7.Navigation 
 - 1.将navigation提取出来，放到layouts.partials._navigation中
 - 2.新建serviceprovider实现变量全局可用 art make:provider ComposerServiceProvider 
 ```
@@ -126,7 +126,7 @@ class NavigationComposer{
 ```
 - 4.在_navigation中消费该变量即可。
 
-### 4.channel settings 
+### 8.channel settings 
 art make:controller ChannelSettingsController --resource 
 
 ```
@@ -226,9 +226,177 @@ class AuthServiceProvider extends ServiceProvider
     }
 ```
 
-#### 5.s3
+#### 9.s3
 忽略
 
-#### 6.Image和Video
+#### 10.Image和Video
 
 art make:job UploadImage 
+```
+class UploadImage implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $channel;
+    public $fileId;
+
+    public function __construct(Channel $channel,$fileId)
+    {
+        $this->channel = $channel;
+        $this->fileId = $fileId;
+    }
+
+    public function handle()
+    {
+        $path = storage_path() . '/uploads/' . $this->fileId;
+        $fileName = $this->fileId . '.png';
+//        File::delete($path);
+        $this->channel->image_filename = $fileName;
+        $this->channel->save();
+    }
+}
+```
+
+art queue:work  #查看进行中的job
+art queue:flush #删除失败的job
+
+#### 11.Resize Image 
+alter table `channels` column `image_fielname` `image_filename` vharchar(255) null;ALTER TABLE `channels` CHANGE COLUMN `image_fielname` `image_filename` varchar(255) null;
+
+composer require intervention/image 
+Intervention\Image\ImageServiceProvider::class,
+'Image'=> Intervention\Image\Facades\Image::class,
+
+#### 12.mix(elixr)
+npm install 
+npm run watch 
+
+#### 13.Video Selection 
+art make:controller VideoUploadController
+Route::get('/upload','VideoUploadController@index')
+VideoUpload组件
+```
+// VideoUpload.vue 
+<template>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Upload</div>
+
+                    <div class="panel-body">
+                        <input type="file" name="video" id="video" @change="fileInputChange" v-if="!uploading">
+
+                        <div id="video-form" v-if="uploading &&!failed">
+                            Form
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    export default {
+        data(){
+            return{
+                uploading:false,
+                uploadingComplete:false,
+                failed:false,
+            }
+        },
+        methods:{
+            fileInputChange(){
+                this.uploading = true;
+                this.failed = false;
+
+
+                console.log("File Change");
+            }
+        },
+        mounted() {
+            console.log('Component mounted.')
+        }
+    }
+</script>
+
+// uploade.blade.php 
+@extends('layouts.app')
+
+@section('content')
+    <video-upload></video-upload>
+@endsection
+```
+
+#### 14.Video Model and Migration 
+art make:model Http/Models/Video -m
+```
+// Channel.php
+    public function video(){
+        return $this->hasMany(Video::class);
+    }
+    
+// Video.php
+class Video extends Model
+{
+    use SoftDeletes;
+    protected $fillable = [
+        'title',
+        'description',
+        'uid',
+        'video_filename',
+        'video_id',
+        'processed',
+        'visibility',
+        'allow_votes',
+        'allow_comments',
+        'processed_percentage',
+    ];
+    public function channel(){
+        return $this->belongsTo(Channel::class);
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'uid';
+    }
+}
+
+// create_videos_table.php
+class CreateVideosTable extends Migration
+{
+    public function up()
+    {
+        Schema::create('videos', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('channel_id')->unsigned();
+            $table->string('uid');
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->boolean('processed')->default(false);
+            $table->string('video_id')->nullable();
+            $table->string('video_filename')->nullable();
+            $table->enum('visibility',['public','unlisted','private']);
+            $table->boolean('allow_votes')->default(false);
+            $table->boolean('allow_comments')->default(false);
+            $table->integer('processed_percentage')->nullable();
+            $table->softDeletes();
+            $table->timestamps();
+
+            $table->foreign('channel_id')->references('id')->on('channels')->onDelete('cascade');
+        });
+    }
+    public function down()
+    {
+        Schema::dropIfExists('videos');
+    }
+}
+```
+
+
+
+
+
+
+

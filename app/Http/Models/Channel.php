@@ -18,6 +18,9 @@ class Channel extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function video(){
+        return $this->hasMany(Video::class);
+    }
     public function getRouteKeyName()
     {
         return 'slug';
